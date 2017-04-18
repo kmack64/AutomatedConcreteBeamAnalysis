@@ -1,0 +1,57 @@
+bottomRebarArea = input("Enter Bottom Reinforcment Area (As): ")
+topRebarArea = input("Enter Top Reinforcment Area (A's): ")
+compressiveStrain = input("Enter starting Compressive Strain: ")
+beamWidth = input("Enter Beam Width: ")
+dPrime = input("Enter d': ")
+d = input("Enter d: ")
+
+rebarGrade = 60
+steelModulus = 29000
+concreteStrength = 5
+const1 = 0.85
+const2 = 0.5
+
+epsilonPrimeS = 0
+c = 0
+
+print "\n"
+print "---------- Analyzing ----------"
+print "\n"
+
+counter = 1
+
+while True:
+    c = ((bottomRebarArea * rebarGrade) - (topRebarArea * compressiveStrain * steelModulus)) / (const1 * concreteStrength * beamWidth * const2)
+    epsilonPrimeS = ((c - dPrime) / c) * 0.003
+    if epsilonPrimeS != compressiveStrain:
+        compressiveStrain = epsilonPrimeS
+        print "Iteration: %d" % counter
+        counter = counter + 1
+    else:
+        break
+
+epsilonS = ((d - c) / c) * 0.003
+
+print "\n"
+print "----------- Results -----------"
+
+if epsilonS >= 0.005:
+    print 'Tension Controlled.'
+    flexuralStrengthReductionFactor = 0.9
+if epsilonS <= 0.002:
+    print 'Compression Controlled.'
+    flexuralStrengthReductionFactor = 0.65
+if epsilonS < 0.005 and epsilonS > 0.002:
+    print 'Transition Zone.'
+
+print "Tension Strain = %f" % epsilonS
+print "Compressive Strain is %f" % epsilonPrimeS
+print "c = %f" % c
+print "\n"
+
+momentCapacity = (topRebarArea * epsilonPrimeS * steelModulus * ( ((c * 0.5) / 2) - dPrime)) + (bottomRebarArea * rebarGrade * (d - ((c * 0.5) / 2)))
+momentCapacity = momentCapacity / 12
+print "Nominarl Moment Capacity = %f k-ft" % momentCapacity
+
+factoredMomentCapacity = flexuralStrengthReductionFactor * momentCapacity
+print "Factored Moment Capacity = %f k-ft" % factoredMomentCapacity
